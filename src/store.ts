@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, chmodSync, mkdirSync } from "node:fs";
+import { platform } from "node:os";
 import { dirname } from "node:path";
 
 /**
@@ -22,5 +23,7 @@ export function saveJson(filePath: string, data: unknown): void {
   mkdirSync(dirname(filePath), { recursive: true });
   const raw = JSON.stringify(data, null, 2) + "\n";
   writeFileSync(filePath, raw, "utf-8");
-  chmodSync(filePath, 0o600);
+  if (platform() !== "win32") {
+    chmodSync(filePath, 0o600);
+  }
 }

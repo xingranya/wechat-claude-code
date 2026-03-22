@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync, chmodSync } from "node:fs";
+import { platform } from "node:os";
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
 
@@ -70,5 +71,7 @@ export function saveConfig(config: Config): void {
     lines.push(`permissionMode=${config.permissionMode}`);
   }
   writeFileSync(CONFIG_PATH, lines.join("\n") + "\n", "utf-8");
-  chmodSync(CONFIG_PATH, 0o600);
+  if (platform() !== "win32") {
+    chmodSync(CONFIG_PATH, 0o600);
+  }
 }
