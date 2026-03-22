@@ -2,6 +2,7 @@ import { createInterface } from 'node:readline';
 import process from 'node:process';
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
+import { homedir, platform } from 'node:os';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 
 import { WeChatApi } from './wechat/api.js';
@@ -59,8 +60,19 @@ function promptUser(question: string, defaultValue?: string): Promise<string> {
 // Setup
 // ---------------------------------------------------------------------------
 
+function openPath(path: string): void {
+  const p = platform();
+  if (p === 'win32') {
+    execSync(`start "" "${path}"`);
+  } else if (p === 'darwin') {
+    execSync(`open "${path}"`);
+  } else {
+    execSync(`xdg-open "${path}"`);
+  }
+}
+
 async function runSetup(): Promise<void> {
-  const DATA_DIR = join(process.env.HOME!, '.wechat-claude-code');
+  const DATA_DIR = join(homedir(), '.wechat-claude-code');
   mkdirSync(DATA_DIR, { recursive: true });
   const QR_PATH = join(DATA_DIR, 'qrcode.png');
 
@@ -75,8 +87,8 @@ async function runSetup(): Promise<void> {
     const pngData = await QRCode.toBuffer(qrcodeUrl, { type: 'png', width: 400, margin: 2 });
     writeFileSync(QR_PATH, pngData);
 
-    // Open with system default viewer (Preview.app on macOS)
-    execSync(`open "${QR_PATH}"`);
+    // Open with system default viewer
+    openPath(QR_PATH);
     console.log('已打开二维码图片，请用微信扫描：');
     console.log(`图片路径: ${QR_PATH}\n`);
     console.log('等待扫码绑定...');

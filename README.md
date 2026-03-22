@@ -11,13 +11,13 @@ A [Claude Code](https://claude.ai/claude-code) Skill that bridges personal WeCha
 - Permission approval — reply `y`/`n` in WeChat to approve Claude's tool use
 - Slash commands — `/help`, `/clear`, `/model`, `/status`, `/skills`
 - Launch any installed Claude Code skill from WeChat
-- macOS launchd daemon — auto-start on boot, auto-restart on crash
+- Cross-platform daemon — supports macOS / Linux / Windows
 - Session persistence — resume conversations across messages
 
 ## Prerequisites
 
 - Node.js >= 18
-- macOS (daemon managed via launchd)
+- macOS / Linux / Windows
 - Personal WeChat account (QR code binding required)
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with `@anthropic-ai/claude-agent-sdk` installed
 
@@ -26,8 +26,16 @@ A [Claude Code](https://claude.ai/claude-code) Skill that bridges personal WeCha
 Clone into your Claude Code skills directory:
 
 ```bash
+# macOS/Linux
 git clone https://github.com/Wechat-ggGitHub/wechat-claude-code.git ~/.claude/skills/wechat-claude-code
 cd ~/.claude/skills/wechat-claude-code
+
+# Windows (run in PowerShell)
+git clone https://github.com/Wechat-ggGitHub/wechat-claude-code.git $env:USERPROFILE\.claude\skills\wechat-claude-code
+cd $env:USERPROFILE\.claude\skills\wechat-claude-code
+```
+
+```bash
 npm install
 ```
 
@@ -40,7 +48,7 @@ npm install
 Scan QR code to bind your WeChat account:
 
 ```bash
-cd ~/.claude/skills/wechat-claude-code
+cd ~/.claude/skills/wechat-claude-code  # Windows: cd $env:USERPROFILE\.claude\skills\wechat-claude-code
 npm run setup
 ```
 
@@ -51,8 +59,6 @@ A QR code image will open — scan it with WeChat. Then configure your working d
 ```bash
 npm run daemon -- start
 ```
-
-This registers a launchd agent for auto-start and auto-restart.
 
 ### 3. Chat in WeChat
 
@@ -95,11 +101,10 @@ WeChat (phone) ←→ ilink bot API ←→ Node.js daemon ←→ Claude Code SDK
 - The daemon long-polls WeChat's ilink bot API for new messages
 - Messages are forwarded to Claude Code via `@anthropic-ai/claude-agent-sdk`
 - Responses are sent back to WeChat
-- A macOS launchd agent keeps the daemon running
 
 ## Data
 
-All data is stored in `~/.wechat-claude-code/`:
+All data is stored in `~/.wechat-claude-code/` (Windows: `%USERPROFILE%\.wechat-claude-code\`):
 
 ```
 ~/.wechat-claude-code/
@@ -109,6 +114,19 @@ All data is stored in `~/.wechat-claude-code/`:
 ├── get_updates_buf # Message polling sync buffer
 └── logs/           # Rotating logs (daily, 30-day retention)
 ```
+
+## Windows Auto-start (Optional)
+
+To auto-start on boot in Windows:
+
+1. Open Task Scheduler
+2. Create Basic Task → name it `wechat-claude-code`
+3. Trigger: At startup
+4. Action: Start a program
+   - Program: `node`
+   - Arguments: `dist/main.js start`
+   - Start in: your project directory
+5. Complete the wizard
 
 ## Development
 

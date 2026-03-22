@@ -11,13 +11,13 @@
 - 权限审批——在微信中回复 `y`/`n` 控制工具执行
 - 斜杠命令——`/help`、`/clear`、`/model`、`/status`、`/skills`
 - 在微信中触发任意已安装的 Claude Code Skill
-- macOS launchd 守护进程——开机自启、崩溃自动重启
+- 跨平台守护进程——支持 macOS/Linux/Windows
 - 会话持久化——跨消息恢复上下文
 
 ## 前置条件
 
 - Node.js >= 18
-- macOS（daemon 通过 launchd 管理）
+- macOS / Linux / Windows
 - 个人微信账号（需扫码绑定）
 - 已安装 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)（含 `@anthropic-ai/claude-agent-sdk`）
 
@@ -26,8 +26,16 @@
 克隆到 Claude Code skills 目录：
 
 ```bash
+# macOS/Linux
 git clone https://github.com/Wechat-ggGitHub/wechat-claude-code.git ~/.claude/skills/wechat-claude-code
 cd ~/.claude/skills/wechat-claude-code
+
+# Windows (在 PowerShell 中执行)
+git clone https://github.com/Wechat-ggGitHub/wechat-claude-code.git $env:USERPROFILE\.claude\skills\wechat-claude-code
+cd $env:USERPROFILE\.claude\skills\wechat-claude-code
+```
+
+```bash
 npm install
 ```
 
@@ -40,7 +48,7 @@ npm install
 扫码绑定微信账号：
 
 ```bash
-cd ~/.claude/skills/wechat-claude-code
+cd ~/.claude/skills/wechat-claude-code  # Windows: cd $env:USERPROFILE\.claude\skills\wechat-claude-code
 npm run setup
 ```
 
@@ -51,8 +59,6 @@ npm run setup
 ```bash
 npm run daemon -- start
 ```
-
-注册 launchd 代理，实现开机自启和自动重启。
 
 ### 3. 在微信中聊天
 
@@ -95,11 +101,10 @@ npm run daemon -- logs     # 查看最近日志
 - 守护进程通过长轮询监听微信 ilink bot API 的新消息
 - 消息通过 `@anthropic-ai/claude-agent-sdk` 转发给 Claude Code
 - 回复发送回微信
-- macOS launchd 代理保持守护进程运行
 
 ## 数据目录
 
-所有数据存储在 `~/.wechat-claude-code/`：
+所有数据存储在 `~/.wechat-claude-code/`（Windows 为 `%USERPROFILE%\.wechat-claude-code\`）：
 
 ```
 ~/.wechat-claude-code/
@@ -107,8 +112,21 @@ npm run daemon -- logs     # 查看最近日志
 ├── config.env      # 全局配置（工作目录、模型、权限模式）
 ├── sessions/       # 会话数据（每个账号一个 JSON）
 ├── get_updates_buf # 消息轮询同步缓冲
-└── logs/           # 运行日志（每日轮转，保留 30 天）
+└── logs/           # 运行日志
 ```
+
+## Windows 开机自启（可选）
+
+如需开机自启，可使用任务计划程序：
+
+1. 打开「任务计划程序」
+2. 创建基本任务 → 命名为 `wechat-claude-code`
+3. 触发器：计算机启动
+4. 操作：启动程序
+   - 程序：`node`
+   - 参数：`dist/main.js start`
+   - 起始位置：你的项目目录
+5. 完成向导
 
 ## 开发
 
