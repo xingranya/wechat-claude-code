@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Cross-platform daemon runner
 import { spawn } from 'node:child_process';
-import { platform, dirname, join } from 'node:path';
+import { platform } from 'node:os';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
