@@ -65,12 +65,45 @@ npm run daemon -- start
 
 ## 守护进程管理
 
+守护进程支持 **macOS / Linux / Windows** 全平台自动开机自启。
+
+### 通用命令
+
 ```bash
 npm run daemon -- start   # 启动服务
 npm run daemon -- stop    # 停止服务
 npm run daemon -- restart # 重启服务
 npm run daemon -- status  # 查看状态
 npm run daemon -- logs    # 查看日志
+```
+
+### 各平台自启机制
+
+| 平台 | 自启方式 | 说明 |
+|------|---------|------|
+| macOS | launchd | 安装为系统服务，开机自启 |
+| Linux | systemd | 安装为系统服务，开机自启 |
+| Windows | Task Scheduler | 登录时启动 |
+
+### 手动管理脚本
+
+```bash
+# Linux / macOS (bash/zsh)
+./scripts/daemon.sh start
+
+# Windows (CMD/PowerShell)
+scripts\daemon.bat start
+```
+
+### Windows 生产环境推荐
+
+推荐使用 [PM2](https://pm2.keymetrics.io/)：
+
+```cmd
+npm install -g pm2
+pm2 start dist\main.js --name wechat-claude
+pm2 save
+pm2 startup
 ```
 
 ## 微信端命令
@@ -114,18 +147,13 @@ Claude 需要执行工具时，会在你的微信发送权限请求：
 | `get_updates_buf` | 消息轮询同步缓冲 |
 | `logs/` | 运行日志 |
 
-## Windows 开机自启（可选）
+## 开机自启
 
-使用任务计划程序实现开机自启：
+运行 `npm run daemon -- start` 后会自动配置对应平台的开机自启：
 
-1. 打开「任务计划程序」
-2. 创建基本任务，命名为 `wechat-claude-code`
-3. 触发器：计算机启动时
-4. 操作：启动程序
-   - 程序/脚本：`node`
-   - 参数：`dist\main.js start`
-   - 起始位置：`%USERPROFILE%\.claude\skills\wechat-claude-code`
-5. 完成向导
+- **macOS**: 使用 `launchd`
+- **Linux**: 使用 `systemd`
+- **Windows**: 使用 Task Scheduler
 
 ## 常见问题
 
